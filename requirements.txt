@@ -1,0 +1,8 @@
+click
+soundfile
+argparse
+pathlib
+numpy
+librosa
+tqdm
+pytest
