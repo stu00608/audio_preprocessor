@@ -205,7 +205,7 @@ def process_single(audio_path, out, db_thresh, min_length, min_interval, hop_siz
     for i, chunk in enumerate(chunks):
         if len(chunk.shape) > 1:
             chunk = chunk.T
-        sf.write(os.path.join(out, f"%s_%d.wav" % (
+        sf.write(os.path.join(out, "%s_%d.wav" % (
             os.path.basename(audio_path).rsplit(".", maxsplit=1)[0], i)), chunk, sr)
 
     # Update the progress bar
