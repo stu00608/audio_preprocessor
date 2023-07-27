@@ -18,5 +18,6 @@ setup(
         'librosa',
         'tqdm',
         'pytest',
+        'openai-whisper',
     ],
 )

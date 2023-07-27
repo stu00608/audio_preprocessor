@@ -3,6 +3,7 @@ import multiprocessing
 from audio_preprocessor.resample import audio_resampler
 from audio_preprocessor.slicer import audio_slicer
 from audio_preprocessor.splitter import audio_splitter
+from audio_preprocessor.whisper_transcriber import whisper_transcriber_pipeline
 
 
 @click.group()
@@ -50,6 +51,18 @@ def split(input_dir, output_dir, time_interval, n_workers):
 
 
 cli.add_command(split)
+
+
+@click.command()
+@click.option('--input_dir', required=True, help='Directory containing audio files to process or single audio file path')
+@click.option('--output_dir', required=True, help='Directory to output processed files')
+@click.option('--whisper_size', type=str, default="medium", help='Whisper size')
+@click.option('--language', type=str, default="", help='Specify language to detect.')
+def whisper_transcriber(input_dir, output_dir, whisper_size, language):
+    whisper_transcriber_pipeline(input_dir, output_dir, whisper_size, language)
+
+
+cli.add_command(whisper_transcriber, name="whisper")
 
 if __name__ == "__main__":
     cli()

@@ -5,6 +5,7 @@ import shutil
 from audio_preprocessor.resample import audio_resampler
 from audio_preprocessor.slicer import audio_slicer
 from audio_preprocessor.splitter import audio_splitter
+from audio_preprocessor.whisper_transcriber import whisper_transcriber_pipeline
 from pathlib import Path
 
 TEST_DIR = Path(__file__).parent / "test_data"
@@ -61,5 +62,21 @@ def test_split():
             data, sample_rate = sf.read(file)
             assert len(data) / sample_rate <= 1
 
+    finally:
+        shutil.rmtree(output_dir)
+
+
+def test_whisper():
+    output_dir = TEST_DIR / "whisper_output"
+    os.makedirs(output_dir, exist_ok=True)
+    try:
+        text, lang = whisper_transcriber_pipeline(
+            "./examples/", output_dir, "base", "")
+        # Test that files are created in the output directory
+        assert len(list(output_dir.glob('**/*.txt'))) > 0
+        # Read the text file and check that it contains the correct text
+        # expected_text = "柔らかいウールの方が あらゆうるより 効果で そのどちらとも 内論性の人口線より 情答である。"
+        # with open(output_dir / "test.txt", "r") as f:
+        #     assert f.read().strip("\n") == expected_text
     finally:
         shutil.rmtree(output_dir)
