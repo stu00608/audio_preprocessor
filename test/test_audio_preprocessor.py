@@ -5,7 +5,7 @@ import shutil
 from audio_preprocessor.resample import audio_resampler
 from audio_preprocessor.slicer import audio_slicer
 from audio_preprocessor.splitter import audio_splitter
-from audio_preprocessor.whisper_transcriber import whisper_transcriber_pipeline
+from audio_preprocessor.whisper_transcriber import whisper_transcriber
 from pathlib import Path
 
 TEST_DIR = Path(__file__).parent / "test_data"
@@ -70,7 +70,7 @@ def test_whisper():
     output_dir = TEST_DIR / "whisper_output"
     os.makedirs(output_dir, exist_ok=True)
     try:
-        text, lang = whisper_transcriber_pipeline(
+        text, lang = whisper_transcriber(
             "./examples/", output_dir, "base", "")
         # Test that files are created in the output directory
         assert len(list(output_dir.glob('**/*.txt'))) > 0

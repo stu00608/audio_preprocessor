@@ -3,7 +3,7 @@ import multiprocessing
 from audio_preprocessor.resample import audio_resampler
 from audio_preprocessor.slicer import audio_slicer
 from audio_preprocessor.splitter import audio_splitter
-from audio_preprocessor.whisper_transcriber import whisper_transcriber_pipeline
+from audio_preprocessor.whisper_transcriber import whisper_transcriber
 
 
 @click.group()
@@ -17,11 +17,11 @@ def cli():
 @click.option('--sample_rate', type=int, required=True, help='Target sample rate')
 @click.option('--overwrite', is_flag=True, help='Whether to overwrite existing files in output_dir')
 @click.option('--n_workers', type=int, default=multiprocessing.cpu_count(), help='Number of worker processes')
-def resample(input_dir, output_dir, sample_rate, overwrite, n_workers):
+def resample_command(input_dir, output_dir, sample_rate, overwrite, n_workers):
     audio_resampler(input_dir, output_dir, sample_rate, overwrite, n_workers)
 
 
-cli.add_command(resample)
+cli.add_command(resample_command, name="resample")
 
 
 @click.command()
@@ -33,12 +33,12 @@ cli.add_command(resample)
 @click.option('--hop_size', type=int, default=10, help='Frame length in milliseconds')
 @click.option('--max_sil_kept', type=int, default=500, help='The maximum silence length kept around the sliced clip, presented in milliseconds')
 @click.option('--n_workers', type=int, default=multiprocessing.cpu_count(), help='Number of worker processes')
-def slicer(input_dir, output_dir, db_thresh, min_length, min_interval, hop_size, max_sil_kept, n_workers):
+def slicer_command(input_dir, output_dir, db_thresh, min_length, min_interval, hop_size, max_sil_kept, n_workers):
     audio_slicer(input_dir, output_dir, db_thresh, min_length,
                  min_interval, hop_size, max_sil_kept, n_workers)
 
 
-cli.add_command(slicer)
+cli.add_command(slicer_command, name="slicer")
 
 
 @click.command()
@@ -46,11 +46,11 @@ cli.add_command(slicer)
 @click.option('--output_dir', required=True, help='Directory to output processed files')
 @click.option('--time_interval', type=int, default=1800, help='Time in seconds for each segment')
 @click.option('--n_workers', type=int, default=multiprocessing.cpu_count(), help='Number of worker processes')
-def split(input_dir, output_dir, time_interval, n_workers):
+def split_command(input_dir, output_dir, time_interval, n_workers):
     audio_splitter(input_dir, output_dir, time_interval, n_workers)
 
 
-cli.add_command(split)
+cli.add_command(split_command, name="split")
 
 
 @click.command()
@@ -58,11 +58,11 @@ cli.add_command(split)
 @click.option('--output_dir', required=True, help='Directory to output processed files')
 @click.option('--whisper_size', type=str, default="medium", help='Whisper size')
 @click.option('--language', type=str, default="", help='Specify language to detect.')
-def whisper_transcriber(input_dir, output_dir, whisper_size, language):
-    whisper_transcriber_pipeline(input_dir, output_dir, whisper_size, language)
+def whisper_transcriber_command(input_dir, output_dir, whisper_size, language):
+    whisper_transcriber(input_dir, output_dir, whisper_size, language)
 
 
-cli.add_command(whisper_transcriber, name="whisper")
+cli.add_command(whisper_transcriber_command, name="whisper")
 
 if __name__ == "__main__":
     cli()

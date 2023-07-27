@@ -2,7 +2,7 @@ import os
 from tqdm import tqdm
 
 
-def whisper_transcriber_pipeline(input_dir, output_dir, whisper_size, language):
+def whisper_transcriber(input_dir, output_dir, whisper_size, language):
     import torch
     import whisper
 
