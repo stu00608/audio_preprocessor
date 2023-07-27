@@ -1,11 +1,43 @@
 import os
+import torch
+import whisper
 from tqdm import tqdm
 
 
-def whisper_transcriber(input_dir, output_dir, whisper_size, language):
-    import torch
-    import whisper
+def whisper_transcribe_one(audio_file, whisper_size, language, model=None):
+    if model == None:
+        assert whisper_size in ["tiny", "base", "small",
+                                "medium", "large"], "Invalid whisper size name."
 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = whisper.load_model(whisper_size, device=device)
+
+    # load audio and pad/trim it to fit 30 seconds
+    audio = whisper.load_audio(audio_file)
+    audio = whisper.pad_or_trim(audio)
+
+    # make log-Mel spectrogram and move to the same device as the model
+    mel = whisper.log_mel_spectrogram(audio).to(model.device)
+
+    # detect the spoken language
+    _, probs = model.detect_language(mel)
+    detected_language = max(probs, key=probs.get)
+    print(f"Detected language: {detected_language}")
+
+    if language != "" and detected_language != language:
+        print(
+            f"Detected language is not {language}, skipping this audio file.")
+        return "", detected_language
+
+    # decode the audio
+    options = whisper.DecodingOptions(
+        fp16=True if model.device.type == "cuda" else False)
+    result = whisper.decode(model, mel, options)
+
+    return result.text, detected_language
+
+
+def whisper_transcriber(input_dir, output_dir, whisper_size, language):
     assert whisper_size in ["tiny", "base", "small",
                             "medium", "large"], "Invalid whisper size name."
 
@@ -22,36 +54,15 @@ def whisper_transcriber(input_dir, output_dir, whisper_size, language):
         audio_paths = [input_dir]
 
     for audio_file in tqdm(audio_paths):
-        # load audio and pad/trim it to fit 30 seconds
-        audio = whisper.load_audio(audio_file)
-        audio = whisper.pad_or_trim(audio)
 
-        # make log-Mel spectrogram and move to the same device as the model
-        mel = whisper.log_mel_spectrogram(audio).to(model.device)
-
-        # detect the spoken language
-        _, probs = model.detect_language(mel)
-        detected_language = max(probs, key=probs.get)
-        print(f"Detected language: {detected_language}")
-
-        if language != "" and detected_language != language:
-            print(
-                f"Detected language is not {language}, skipping this audio file.")
-            continue
-
-        # decode the audio
-        options = whisper.DecodingOptions(
-            fp16=True if model.device.type == "cuda" else False)
-        result = whisper.decode(model, mel, options)
-
-        # print the recognized text
-        print(result.text)
+        text, lang = whisper_transcribe_one(
+            audio_file, whisper_size, language, model)
 
         # Export transcribed text to a text file in output_dir
         os.makedirs(output_dir, exist_ok=True)
         ouput_file_name = os.path.basename(
             audio_file).rsplit(".", maxsplit=1)[0] + ".txt"
         with open(os.path.join(output_dir, ouput_file_name), "w") as f:
-            f.write(result.text)
+            f.write(text)
 
-        return result.text, detected_language
+        return text, lang
