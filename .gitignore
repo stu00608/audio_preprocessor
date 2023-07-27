@@ -136,3 +136,5 @@ dmypy.json
 *.wav
 *.ogg
 *.flac
+# Except examples/text.mp3
+!examples/test.mp3
