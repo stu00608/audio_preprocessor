@@ -9,7 +9,7 @@
 - [x] Audio resample. 
 - [x] Audio split, just simple split based on specified time interval. 
 - [x] Audio slice based on silence detection.
-- [ ] Audio transcribe using whisper (for VITS-fast-finetuning)
+- [x] Audio transcribe using whisper (for VITS-fast-finetuning)
 
 ## Environment
 
